@@ -12,6 +12,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const mongoose = require("mongoose");
 const composerRoutes = require("./routes/Egge-composer-routes");
+const personRoutes = require("./routes/Egge-person-routes");
 // using the express module as app
 const app = express();
 // establishing the port
@@ -48,6 +49,7 @@ const openapiSpecification = swaggerJsdoc(options);
 // wire up the database connection
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 app.use("/api", composerRoutes);
+app.use("/api", personRoutes);
 const server = http.createServer(app);
 // Establishing and logging the connection to the database
 server.listen(port, () => {
