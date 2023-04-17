@@ -1,95 +1,140 @@
-const express = require('express');
-const router = express.Router();
-const Composer = require('./models/yourLastName-composer');
-
-// findAllComposers
 /**
+	Title: Egge-composer-routes.js
+    Author: William Egge
+    Date: 4 April 2023
+    Description: This code creates an Express router to handle HTTP requests for managing composer data, providing endpoints to retrieve all composers, retrieve a composer by ID, and create a new composer in a MongoDB database.
+ */
+
+// import statements
+const express = require("express");
+const router = express.Router();
+const Composer = require("../models/Egge-composer");
+
+/**
+ * findAllComposers
  * @openapi
  * /api/composers:
- *   get:
- *     summary: Retrieve an array of composer documents.
- *     responses:
- *       200:
- *         description: Array of composer documents.
- *       500:
- *         description: Server Exception.
- *       501:
- *         description: MongoDB Exception.
+ *  get:
+ *   tags:
+ *    - Composers
+ *   summary: returns a list of composer documents
+ *   description: API for returning a list of composers from MongoDB Atlas
+ *   responses:
+ *    '200':
+ *      description: Composer documents
+ *    '500':
+ *      description: Server Exception
+ *    '501':
+ *      description: MongoDB Exception
  */
-router.get('/api/composers', async (req, res) => {
+router.get("/composers", async (req, res) => {
   try {
-    const composers = await Composer.find();
-    res.status(200).json(composers);
+    Composer.find({}, (err, composers) => {
+      if (err) {
+        console.log(err);
+        res.status(501).send({
+          message: "MongoDB Exception",
+        });
+      } else {
+        console.log(composers);
+        res.json(composers);
+      }
+    });
   } catch (error) {
-    res.status(501).json({ message: 'MongoDB Exception', error });
+    console.log(error);
+    res.status(500).send({ message: "Server Exception", error });
   }
 });
 
-// findComposerById
 /**
+ * findComposerById
  * @openapi
  * /api/composers/{id}:
- *   get:
- *     summary: Retrieve a composer document by ID.
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *     responses:
- *       200:
- *         description: Composer document.
- *       500:
- *         description: Server Exception.
- *       501:
- *         description: MongoDB Exception.
+ *  get:
+ *   tags:
+ *    - Composers
+ *   summary: returns a composer document by ID
+ *   description: API for returning a composer document by ID from MongoDB Atlas
+ *   parameters:
+ *    - name: id
+ *      in: path
+ *      required: true
+ *      description: The composer ID requested by the client
+ *      schema:
+ *        type: string
+ *   responses:
+ *    '200':
+ *      description: Composer document in JSON format
+ *    '500':
+ *      description: Server Exception
+ *    '501':
+ *      description: MongoDB Exception
  */
-router.get('/api/composers/:id', async (req, res) => {
+router.get("/composers/:id", async (req, res) => {
   try {
-    const composer = await Composer.findOne({ _id: req.params.id });
-    res.status(200).json(composer);
+    Composer.findOne({ _id: req.params.id }, (err, composer) => {
+      if (err) {
+        console.log(err);
+        res.status(501).send({
+          message: "MongoDB Exception:",
+          err,
+        });
+      } else {
+        console.log(composer);
+        res.json(composer);
+      }
+    });
   } catch (error) {
-    res.status(501).json({ message: 'MongoDB Exception', error });
+    res.status(500).json({ message: "MongoDB Exception:", error });
   }
 });
 
-// createComposer
 /**
+ * createComposer
  * @openapi
  * /api/composers:
- *   post:
- *     summary: Create a new composer.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *     responses:
- *       200:
- *         description: Composer document.
- *       500:
- *         description: Server Exception.
- *       501:
- *         description: MongoDB Exception.
+ *  post:
+ *   tags:
+ *    - Composers
+ *   summary: creates a new composer document
+ *   description: API for creating a new composer document in MongoDB Atlas
+ *   requestBody:
+ *    required: true
+ *    content:
+ *      application/json:
+ *        schema:
+ *          type: object
+ *          properties:
+ *            firstName:
+ *              type: string
+ *            lastName:
+ *              type: string
+ *   responses:
+ *    '200':
+ *      description: Composer document.
+ *    '500':
+ *      description: Server Exception.
+ *    '501':
+ *      description: MongoDB Exception.
  */
-router.post('/api/composers', async (req, res) => {
+router.post("/composers", async (req, res) => {
   try {
     const composer = new Composer({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
     });
-    await composer.save();
-    res.status(200).json(composer);
+    await composer.save((err, composer) => {
+      if (err) {
+        res.status(501).json({ message: "MongoDB Exception", err });
+      } else {
+        console.log(composer);
+        res.json(composer);
+      }
+    });
   } catch (error) {
-    res.status(501).json({ message: 'MongoDB Exception', error });
+    res.status(500).send({ message: "Server Exception", error });
   }
 });
 
+// export the router
 module.exports = router;
