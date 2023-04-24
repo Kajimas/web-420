@@ -3,7 +3,7 @@
     Author: William Egge
     Date: 23 April 2023
     Description: This code creates an Express router to handle HTTP requests for managing composer data, providing endpoints to retrieve all composers, retrieve a composer by ID, and create a new composer in a MongoDB database.
-    referenced work: https://github.com/chrisgorham999/web-420/blob/main/routes/gorham-person-routes.js
+    referenced work: N/A
  */
 
 // import statements
