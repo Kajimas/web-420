@@ -13,6 +13,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const mongoose = require("mongoose");
 const composerRoutes = require("./routes/Egge-composer-routes");
 const personRoutes = require("./routes/Egge-person-routes");
+const sessionRoutes = require("./routes/Egge-session-routes");
 
 // using the express module as app
 const app = express();
@@ -33,7 +34,7 @@ mongoose
   .then(() => {
     console.log("MongoDB connection successful.");
   })
-  .catch((err) => {
+  .catch((err: any) => {
     console.log(err);
   });
 
@@ -59,6 +60,12 @@ const openapiSpecification = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 app.use("/api", composerRoutes);
 app.use("/api", personRoutes);
+app.use("/api", sessionRoutes);
+
+// app.use("/api/composer", composerRoutes);
+// app.use("/api/person", personRoutes);
+// app.use("/api/session", sessionRoutes);
+
 
 const server = http.createServer(app);
 
