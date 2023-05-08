@@ -1,7 +1,7 @@
 /**
 	Title: Egge-composer-routes.js
     Author: William Egge
-    Date: 4 April 2023
+    Date: 7 May 2023
     Description: This code creates an Express router to handle HTTP requests for managing composer data, providing endpoints to retrieve all composers, retrieve a composer by ID, and create a new composer in a MongoDB database.
  */
 
@@ -72,7 +72,7 @@ router.get("/composers", async (req, res) => {
  */
 router.get("/composers/:id", async (req, res) => {
   try {
-    Composer.findOne({ _id: req.params.id }, (err, composer) => {
+    Composer.findOne({"_id": req.params.id}, (err, composer) => {
       if (err) {
         console.log(err);
         res.status(501).send({
@@ -133,6 +133,111 @@ router.post("/composers", async (req, res) => {
     });
   } catch (error) {
     res.status(500).send({ message: "Server Exception", error });
+  }
+});
+
+/**
+ * updateComposerById
+ * @openapi
+ * /api/composers/{id}:
+ *  put:
+ *   tags:
+ *    - Composers
+ *   summary: updates a composer document by ID
+ *   description: API for updating a composer document by ID in MongoDB Atlas
+ *   parameters:
+ *    - name: id
+ *      in: path
+ *      required: true
+ *      description: The composer ID requested by the client
+ *      schema:
+ *        type: string
+ *   requestBody:
+ *    required: true
+ *    content:
+ *      application/json:
+ *        schema:
+ *          type: object
+ *          properties:
+ *            firstName:
+ *              type: string
+ *            lastName:
+ *              type: string
+ *   responses:
+ *    '200':
+ *      description: Array of composer documents.
+ *    '401':
+ *      description: Invalid composerId.
+ *    '500':
+ *      description: Server Exception.
+ *    '501':
+ *      description: MongoDB Exception.
+ */
+router.put("/composers/:id", async (req, res) => {
+  try {
+    Composer.findOne({"_id": req.params.id}, (err, composer) => {
+      if (err) {
+        console.log("Error in findOne: ", err); // Added log statement
+        res.status(501).send({ message: "MongoDB Exception: findOne", err });
+      } else if (composer) {
+        composer.set({
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+        });
+        composer.save((err, savedComposer) => {
+          if (err) {
+            console.log("Error in save: ", err); // Added log statement
+            res.status(501).send({ message: "MongoDB Exception: save", err });
+          } else {
+            res.json(savedComposer);
+          }
+        });
+      } else {
+        res.status(401).send({ message: "Invalid composerId" });
+      }
+    });
+  } catch (error) {
+    console.log("Error in catch block: ", error); // Added log statement
+    res.status(500).send({ message: "Server Exception:", error });
+  }
+});
+
+
+/**
+ * deleteComposerById
+ * @openapi
+ * /api/composers/{id}:
+ *  delete:
+ *   tags:
+ *    - Composers
+ *   summary: deletes a composer document by ID
+ *   description: API for deleting a composer document by ID from MongoDB Atlas
+ *   parameters:
+ *    - name: id
+ *      in: path
+ *      required: true
+ *      description: The composer ID requested by the client
+ *      schema:
+ *        type: string
+ *   responses:
+ *    '200':
+ *      description: Composer document
+ *    '500':
+ *      description: Server Exception
+ *    '501':
+ *      description: MongoDB Exception
+ */
+router.delete("/composers/:id", async (req, res) => {
+  try {
+    Composer.findByIdAndDelete({"_id": req.params.id }, (err, deletedComposer) => {
+      if (err) {
+        res.status(501).send({ message: "MongoDB Exception:", err });
+      } else {
+        res.json(deletedComposer);
+      }
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Server Exception:", error });
   }
 });
 
